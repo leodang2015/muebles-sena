@@ -98,7 +98,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 140 cm, Ancho: 40 cm, Profundidad: 55 cm',
     color: 'Caoba',
     peso: 30000,
-    foto: 'images/mesa_caoba.jpg',
+    foto: 'public/images/mesa_caoba.jpg',
     precio: 140000,
     stock: 3
   },
@@ -111,7 +111,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 140 cm, Ancho: 60 cm, Profundidad: 55 cm',
     color: 'Avellana',
     peso: 60000,
-    foto: 'images/mesa_avellana.jpg',
+    foto: 'public/images/mesa_avellana.jpg',
     precio: 180000,
     stock: 1
   },
@@ -125,7 +125,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 90 cm, Ancho: 55 cm, Profundidad: 55 cm',
     color: 'Gris Antracita',
     peso: 8000,
-    foto: 'images/silla_exterior.jpg',
+    foto: 'public/images/silla_exterior.jpg',
     precio: 90000,
     stock: 10
   },
@@ -138,7 +138,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 85 cm, Ancho: 180 cm, Profundidad: 80 cm',
     color: 'Beige',
     peso: 25000,
-    foto: 'images/sofa_exterior.jpg',
+    foto: 'public/images/sofa_exterior.jpg',
     precio: 450000,
     stock: 4
   },
@@ -152,7 +152,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 105 cm, Ancho: 52 cm, Profundidad: 55 cm',
     color: 'Caoba / Oro',
     peso: 9500,
-    foto: 'images/silla_griega.jpg',
+    foto: 'public/images/silla_griega.jpg',
     precio: 135000,
     stock: 8
   },
@@ -165,7 +165,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 90 cm, Ancho: 160 cm, Profundidad: 45 cm',
     color: 'Nogal Oscuro / Oro',
     peso: 45000,
-    foto: 'images/credenza_clasica.jpg',
+    foto: 'public/images/credenza_clasica.jpg',
     precio: 680000,
     stock: 2
   },
@@ -178,7 +178,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 75 cm, Ancho: 80 cm, Profundidad: 80 cm',
     color: 'Blanco Imperial',
     peso: 18000,
-    foto: 'images/mesa_te_blanca.jpg',
+    foto: 'public/images/mesa_te_blanca.jpg',
     precio: 320000,
     stock: 3
   }
@@ -322,10 +322,10 @@ function initDB() {
       } else {
         // Fallback for custom added items in user localStorage
         if (item.foto) {
-          if (item.foto.startsWith('public/images/')) {
-            item.foto = item.foto.replace('public/images/', 'images/');
-          } else if (item.foto.startsWith('/images/')) {
-            item.foto = item.foto.slice(1);
+          if (item.foto.startsWith('/images/')) {
+            item.foto = 'public' + item.foto;
+          } else if (item.foto.startsWith('images/')) {
+            item.foto = 'public/' + item.foto;
           }
         }
       }
@@ -687,8 +687,8 @@ function renderStoreGrid() {
     card.innerHTML = `
       <div class="relative aspect-[4/3] bg-stone-100 overflow-hidden">
          <img 
-          src="${mueble.foto || 'images/logo_alpes.jpg'}" 
-          onerror="this.onerror=null; this.src='images/logo_alpes.jpg';"
+          src="${mueble.foto || 'public/images/logo_alpes.jpg'}" 
+          onerror="this.onerror=null; this.src='public/images/logo_alpes.jpg';"
           alt="${mueble.nombre}" 
           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         >
@@ -831,8 +831,8 @@ function renderDetailedProduct() {
       <!-- Left side: product image -->
       <div class="lg:col-span-5 rounded-3xl overflow-hidden bg-stone-100 border border-stone-200">
         <img 
-          src="${m.foto || 'images/logo_alpes.jpg'}" 
-          onerror="this.onerror=null; this.src='images/logo_alpes.jpg';"
+          src="${m.foto || 'public/images/logo_alpes.jpg'}" 
+          onerror="this.onerror=null; this.src='public/images/logo_alpes.jpg';"
           alt="${m.nombre}" 
           class="w-full h-full object-cover aspect-[4/3]"
         >
@@ -1005,7 +1005,7 @@ function renderCartList() {
     tr.innerHTML = `
       <td class="py-4 pr-3 flex items-center gap-3">
         <div class="w-16 h-12 rounded-lg overflow-hidden bg-stone-150 border shrink-0">
-          <img src="${item.mueble.foto || 'images/logo_alpes.jpg'}" onerror="this.onerror=null; this.src='images/logo_alpes.jpg';" alt="${item.mueble.nombre}" class="w-full h-full object-cover">
+          <img src="${item.mueble.foto || 'public/images/logo_alpes.jpg'}" onerror="this.onerror=null; this.src='public/images/logo_alpes.jpg';" alt="${item.mueble.nombre}" class="w-full h-full object-cover">
         </div>
         <div>
           <p class="text-[9px] font-mono text-stone-400 font-bold uppercase leading-none mb-1">REF: ${item.mueble.referencia} • ${item.mueble.tipo}</p>
