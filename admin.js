@@ -81,7 +81,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 140 cm, Ancho: 40 cm, Profundidad: 55 cm',
     color: 'Natural',
     peso: 30000,
-    foto: 'images/mesa_natural.jpg',
+    foto: 'public/images/mesa_natural.jpg',
     precio: 140000,
     stock: 2
   },
@@ -94,7 +94,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 140 cm, Ancho: 40 cm, Profundidad: 55 cm',
     color: 'Caoba',
     peso: 30000,
-    foto: 'images/mesa_caoba.jpg',
+    foto: 'public/images/mesa_caoba.jpg',
     precio: 140000,
     stock: 3
   },
@@ -107,7 +107,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 140 cm, Ancho: 60 cm, Profundidad: 55 cm',
     color: 'Avellana',
     peso: 60000,
-    foto: 'images/mesa_avellana.jpg',
+    foto: 'public/images/mesa_avellana.jpg',
     precio: 180000,
     stock: 1
   },
@@ -120,7 +120,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 90 cm, Ancho: 55 cm, Profundidad: 55 cm',
     color: 'Gris Antracita',
     peso: 8000,
-    foto: 'images/silla_exterior.jpg',
+    foto: 'public/images/silla_exterior.jpg',
     precio: 90000,
     stock: 10
   },
@@ -133,7 +133,7 @@ const INITIAL_MUEBLES = [
     dimensions: 'Alto: 85 cm, Ancho: 180 cm, Profundidad: 80 cm',
     color: 'Beige',
     peso: 25000,
-    foto: 'images/sofa_exterior.jpg',
+    foto: 'public/images/sofa_exterior.jpg',
     precio: 450000,
     stock: 4
   },
@@ -146,7 +146,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 105 cm, Ancho: 52 cm, Profundidad: 55 cm',
     color: 'Caoba / Oro',
     peso: 9500,
-    foto: 'images/silla_griega.jpg',
+    foto: 'public/images/silla_griega.jpg',
     precio: 135000,
     stock: 8
   },
@@ -159,7 +159,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 90 cm, Ancho: 160 cm, Profundidad: 45 cm',
     color: 'Nogal Oscuro / Oro',
     peso: 45000,
-    foto: 'images/credenza_clasica.jpg',
+    foto: 'public/images/credenza_clasica.jpg',
     precio: 680000,
     stock: 2
   },
@@ -172,7 +172,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 75 cm, Ancho: 80 cm, Profundidad: 80 cm',
     color: 'Blanco Imperial',
     peso: 18000,
-    foto: 'images/mesa_te_blanca.jpg',
+    foto: 'public/images/mesa_te_blanca.jpg',
     precio: 320000,
     stock: 3
   }
@@ -302,10 +302,10 @@ function initDB() {
       } else {
         // Fallback for custom added items in user localStorage
         if (item.foto) {
-          if (item.foto.startsWith('public/images/')) {
-            item.foto = item.foto.replace('public/images/', 'images/');
-          } else if (item.foto.startsWith('/images/')) {
-            item.foto = item.foto.slice(1);
+          if (item.foto.startsWith('/images/')) {
+            item.foto = 'public' + item.foto;
+          } else if (item.foto.startsWith('images/')) {
+            item.foto = 'public/' + item.foto;
           }
         }
       }
@@ -621,10 +621,10 @@ document.addEventListener('DOMContentLoaded', () => {
     imgPathText.textContent = url || '(Sin imagen)';
     if (url) {
       imgPreview.src = url;
-      imgPreview.setAttribute('onerror', "this.onerror=null; this.src='images/logo_alpes.jpg';");
+      imgPreview.setAttribute('onerror', "this.onerror=null; this.src='public/images/logo_alpes.jpg';");
       imgPreview.classList.remove('opacity-40');
     } else {
-      imgPreview.src = 'images/logo_alpes.jpg';
+      imgPreview.src = 'public/images/logo_alpes.jpg';
       imgPreview.classList.add('opacity-40');
     }
   }
@@ -733,21 +733,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const matLower = material.toLowerCase();
         
         if (nameLower.includes('mesa') && (nameLower.includes('natural') || nameLower.includes('wood') || matLower.includes('madera')) && !nameLower.includes('caoba') && !nameLower.includes('avellana')) {
-          finalUrl = 'images/mesa_natural.jpg';
+          finalUrl = 'public/images/mesa_natural.jpg';
         } else if (nameLower.includes('caoba') || nameLower.includes('mahogany') || matLower.includes('caoba')) {
-          finalUrl = 'images/mesa_caoba.jpg';
+          finalUrl = 'public/images/mesa_caoba.jpg';
         } else if (nameLower.includes('avellana') || nameLower.includes('hazelnut')) {
-          finalUrl = 'images/mesa_avellana.jpg';
+          finalUrl = 'public/images/mesa_avellana.jpg';
         } else if (nameLower.includes('silla') && (nameLower.includes('griega') || nameLower.includes('imperial'))) {
-          finalUrl = 'images/silla_griega.jpg';
+          finalUrl = 'public/images/silla_griega.jpg';
         } else if (nameLower.includes('credenza') || nameLower.includes('aparador') || nameLower.includes('bufet')) {
-          finalUrl = 'images/credenza_clasica.jpg';
+          finalUrl = 'public/images/credenza_clasica.jpg';
         } else if (tipo === 'Exterior' && (nameLower.includes('sofá') || nameLower.includes('sofa') || nameLower.includes('rattan') || nameLower.includes('mimbre'))) {
-          finalUrl = 'images/sofa_exterior.jpg';
+          finalUrl = 'public/images/sofa_exterior.jpg';
         } else if (tipo === 'Exterior' && (nameLower.includes('silla') || nameLower.includes('reclinable'))) {
-          finalUrl = 'images/silla_exterior.jpg';
+          finalUrl = 'public/images/silla_exterior.jpg';
         } else if (nameLower.includes('té') || nameLower.includes('te') || nameLower.includes('blanco') || nameLower.includes('blanc')) {
-          finalUrl = 'images/mesa_te_blanca.jpg';
+          finalUrl = 'public/images/mesa_te_blanca.jpg';
         } else {
           // Dynamic query from beautiful unsplash matching name
           const cleanKeywords = encodeURIComponent(`${material || 'wooden'} ${nombre.split(' ')[0]}`);
@@ -803,7 +803,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('f-stock').value = item.stock;
       document.getElementById('f-descripcion').value = item.descripcion || '';
       
-      const fotoVal = item.foto || 'images/mesa_natural.jpg';
+      const fotoVal = item.foto || 'public/images/mesa_natural.jpg';
       updateFormImage(fotoVal);
       fFotoManual.value = fotoVal;
     } else {
@@ -821,8 +821,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('f-stock').value = '';
       document.getElementById('f-descripcion').value = '';
       
-      updateFormImage('images/mesa_natural.jpg');
-      fFotoManual.value = 'images/mesa_natural.jpg';
+      updateFormImage('public/images/mesa_natural.jpg');
+      fFotoManual.value = 'public/images/mesa_natural.jpg';
     }
     modalFormMueble.classList.remove('hidden');
   }
@@ -1132,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', () => {
       row.innerHTML = `
         <!-- Image & Ref -->
         <div class="md:col-span-5 flex items-center gap-3">
-          <img src="${m.foto || 'images/logo_alpes.jpg'}" onerror="this.onerror=null; this.src='images/logo_alpes.jpg';" alt="${m.nombre}" class="w-12 h-10 object-cover rounded-lg bg-stone-100 border shrink-0">
+          <img src="${m.foto || 'public/images/logo_alpes.jpg'}" onerror="this.onerror=null; this.src='public/images/logo_alpes.jpg';" alt="${m.nombre}" class="w-12 h-10 object-cover rounded-lg bg-stone-100 border shrink-0">
           <div>
             <p class="font-mono text-[10px] text-stone-400 font-bold">REF: ${m.referencia}</p>
             <p class="font-serif text-xs text-stone-900 font-extrabold">${m.nombre}</p>
