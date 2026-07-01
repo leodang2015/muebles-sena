@@ -85,7 +85,7 @@ const INITIAL_MUEBLES = [
     dimensiones: 'Alto: 140 cm, Ancho: 40 cm, Profundidad: 55 cm',
     color: 'Natural',
     peso: 30000,
-    foto: 'images/mesa_natural.jpg',
+    foto: 'public/images/mesa_natural.jpg',
     precio: 140000,
     stock: 2
   },
