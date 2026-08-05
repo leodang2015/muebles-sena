@@ -1,12 +1,3 @@
-/**
- * Muebles los Alpes — Consola Administrativa Standalone (SENA)
- * Archivo de Lógica / Controladora JavaScript (admin.js)
- */
-
-// ========================================== CONSTANTES Y DATOS INICIALES ==========================================
-
-// No se usan enlaces externos de Unsplash para evitar desajustes con las descripciones reales.
-
 const INITIAL_CLIENTES = [
   {
     id: 'cli-001',
@@ -355,10 +346,122 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Database
   initDB();
 
-  // Initialize Lucide Icons
-  lucide.createIcons();
+  const sessionActive = localStorage.getItem('alpes_admin_session') === 'true';
+  if (!sessionActive) {
+    // Hide all normal content
+    const originalChildren = Array.from(document.body.children);
+    originalChildren.forEach(child => {
+      if (child.tagName !== 'SCRIPT') {
+        child.classList.add('hidden');
+      }
+    });
 
-  // DOM Elements Tab navigation
+    // Create login guard
+    const guardDiv = document.createElement('div');
+    guardDiv.id = 'admin-login-guard';
+    guardDiv.className = 'w-full';
+    guardDiv.innerHTML = `
+<div class="min-h-screen bg-stone-950 text-stone-100 flex items-center justify-center p-6 relative overflow-hidden font-sans">
+  <div class="absolute w-96 h-96 rounded-full bg-amber-600/10 blur-3xl -top-12 -left-12"></div>
+  <div class="absolute w-96 h-96 rounded-full bg-stone-850/20 blur-3xl -bottom-12 -right-12"></div>
+
+  <div class="max-w-md w-full bg-stone-900 border border-stone-800 rounded-3xl p-8 shadow-2xl relative z-10 space-y-6">
+    <div class="text-center space-y-3">
+      <div class="w-16 h-16 rounded-2xl bg-amber-950 border border-amber-800/20 flex items-center justify-center mx-auto shadow-md">
+        <i data-lucide="shield-alert" class="w-8 h-8 text-amber-500"></i>
+      </div>
+      
+      <div class="space-y-1">
+        <h1 class="text-xl font-display font-black text-white tracking-wide">Muebles los Alpes</h1>
+        <p class="text-[11px] font-mono text-stone-400 uppercase tracking-widest">Consola de Control • Acceso Restringido</p>
+      </div>
+    </div>
+
+    <div id="admin-gate-error-box" class="bg-red-950/45 border border-red-900/35 text-red-200 p-3.5 rounded-xl text-xs font-semibold leading-relaxed hidden flex gap-2.5 items-start">
+      <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+      <span id="admin-gate-error-msg"></span>
+    </div>
+
+    <form id="admin-gate-login-form" class="space-y-4">
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold block">Contraseña Administrativa</label>
+        <div class="relative">
+          <i data-lucide="lock" class="absolute left-3.5 top-3.5 text-stone-500 w-4 h-4"></i>
+          <input type="password" id="admin-gate-password" class="w-full pl-10 pr-4 py-3 bg-stone-950 border border-stone-800 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/35 transition placeholder-stone-600" placeholder="••••••••" required>
+        </div>
+        <p class="text-[10px] text-stone-500 mt-1 block leading-tight font-mono">Simulación de Auditoría SENA: la clave es <b>admin123</b></p>
+      </div>
+
+      <button type="submit" class="w-full bg-amber-800 hover:bg-amber-700 active:bg-amber-900 text-white rounded-xl py-3 text-xs font-extrabold transition shadow-md uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1.5">
+        <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+        <span>Autenticar y Acceder</span>
+      </button>
+    </form>
+
+    <div class="pt-4 border-t border-stone-800 text-center">
+      <a href="index.html" class="inline-flex items-center gap-1.5 text-xs text-stone-400 hover:text-white font-medium transition">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span>Volver a la Tienda</span>
+      </a>
+    </div>
+  </div>
+</div>
+    `;
+    document.body.appendChild(guardDiv);
+    lucide.createIcons();
+
+    const gateForm = document.getElementById('admin-gate-login-form');
+    const gateErrorBox = document.getElementById('admin-gate-error-box');
+    const gateErrorMsg = document.getElementById('admin-gate-error-msg');
+
+    gateForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      gateErrorBox.classList.add('hidden');
+
+      const passVal = document.getElementById('admin-gate-password').value;
+      if (passVal === 'admin123') {
+        localStorage.setItem('alpes_admin_session', 'true');
+        alert('¡Acceso administrativo concedido!');
+        guardDiv.remove();
+        originalChildren.forEach(child => {
+          child.classList.remove('hidden');
+        });
+        // Boot normal admin app
+        bootAdminApp();
+      } else {
+        gateErrorMsg.textContent = 'Contraseña incorrecta. Intente con el código de simulación: admin123';
+        gateErrorBox.classList.remove('hidden');
+      }
+    });
+  } else {
+    bootAdminApp();
+  }
+
+  function bootAdminApp() {
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Add logout button dynamically in the top header widgets
+    const widgetsWrap = document.querySelector('.admin-widgets');
+    if (widgetsWrap) {
+      const logoutBtn = document.createElement('button');
+      logoutBtn.className = 'admin-btn-reset bg-red-650 hover:bg-red-750 text-white flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer';
+      logoutBtn.style.backgroundColor = '#b91c1c';
+      logoutBtn.style.color = '#ffffff';
+      logoutBtn.innerHTML = `
+        <i data-lucide="log-out" class="w-3.5 h-3.5 text-white"></i>
+        <span>Cerrar Sesión</span>
+      `;
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('alpes_admin_session');
+        alert('Sesión administrativa cerrada.');
+        window.location.reload();
+      });
+      widgetsWrap.appendChild(logoutBtn);
+      lucide.createIcons();
+    }
+
+    // DOM Elements Tab navigation
   const tabMueblesBtn = document.getElementById('tab-muebles-btn');
   const tabClientesBtn = document.getElementById('tab-clientes-btn');
   const tabPreciosBtn = document.getElementById('tab-precios-btn');
@@ -610,11 +713,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const imgPreview = document.getElementById('mueble-form-img-preview');
   const imgPathText = document.getElementById('mueble-form-img-path');
 
-  const btnGenerateAi = document.getElementById('btn-generate-ai');
-  const aiProgressBox = document.getElementById('ai-progress-box');
-  const aiProgressBar = document.getElementById('ai-progress-bar');
-  const aiProgressStatus = document.getElementById('ai-progress-status');
-  const aiProgressPercent = document.getElementById('ai-progress-percent');
+  const btnGenerateAi = null;
+  const aiProgressBox = null;
+  const aiProgressBar = null;
+  const aiProgressStatus = null;
+  const aiProgressPercent = null;
 
   function updateFormImage(url) {
     fFoto.value = url;
@@ -689,89 +792,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  btnGenerateAi.addEventListener('click', () => {
-    const nombre = document.getElementById('f-nombre').value.trim();
-    const material = document.getElementById('f-material').value.trim();
-    const tipo = document.getElementById('f-tipo').value;
-    
-    if (!nombre) {
-      alert('Por favor ingrese al menos el "Nombre Comercial" del mueble para que Alpes AI pueda generar un diseño apropiado.');
-      document.getElementById('f-nombre').focus();
-      return;
-    }
-
-    aiProgressBox.classList.remove('hidden');
-    btnGenerateAi.disabled = true;
-    btnGenerateAi.classList.add('opacity-50', 'pointer-events-none');
-    
-    let progress = 0;
-    aiProgressBar.style.width = '0%';
-    aiProgressPercent.textContent = '0%';
-    
-    const steps = [
-      { prg: 15, msg: 'Conectando con el Servidor Creativo Alpes AI...' },
-      { prg: 40, msg: `Diseñando modelo conceptual para "${nombre}" (${material})...` },
-      { prg: 70, msg: 'Descargando renderizado 3D de alta definición en formato optimizado...' },
-      { prg: 90, msg: 'Sanitizando URL y aplicando filtros de iluminación de catálogo...' },
-      { prg: 100, msg: '¡Imagen descargada e integrada con éxito al catálogo!' }
-    ];
-
-    let currentStep = 0;
-    const interval = setInterval(() => {
-      progress += Math.floor(Math.random() * 8) + 4;
-      if (progress >= steps[currentStep].prg) {
-        aiProgressStatus.textContent = steps[currentStep].msg;
-        currentStep = Math.min(currentStep + 1, steps.length - 1);
-      }
-      
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        
-        let finalUrl = '';
-        const nameLower = nombre.toLowerCase();
-        const matLower = material.toLowerCase();
-        
-        if (nameLower.includes('mesa') && (nameLower.includes('natural') || nameLower.includes('wood') || matLower.includes('madera')) && !nameLower.includes('caoba') && !nameLower.includes('avellana')) {
-          finalUrl = 'public/images/mesa_natural.jpg';
-        } else if (nameLower.includes('caoba') || nameLower.includes('mahogany') || matLower.includes('caoba')) {
-          finalUrl = 'public/images/mesa_caoba.jpg';
-        } else if (nameLower.includes('avellana') || nameLower.includes('hazelnut')) {
-          finalUrl = 'public/images/mesa_avellana.jpg';
-        } else if (nameLower.includes('silla') && (nameLower.includes('griega') || nameLower.includes('imperial'))) {
-          finalUrl = 'public/images/silla_griega.jpg';
-        } else if (nameLower.includes('credenza') || nameLower.includes('aparador') || nameLower.includes('bufet')) {
-          finalUrl = 'public/images/credenza_clasica.jpg';
-        } else if (tipo === 'Exterior' && (nameLower.includes('sofá') || nameLower.includes('sofa') || nameLower.includes('rattan') || nameLower.includes('mimbre'))) {
-          finalUrl = 'public/images/sofa_exterior.jpg';
-        } else if (tipo === 'Exterior' && (nameLower.includes('silla') || nameLower.includes('reclinable'))) {
-          finalUrl = 'public/images/silla_exterior.jpg';
-        } else if (nameLower.includes('té') || nameLower.includes('te') || nameLower.includes('blanco') || nameLower.includes('blanc')) {
-          finalUrl = 'public/images/mesa_te_blanca.jpg';
-        } else {
-          // Dynamic query from beautiful unsplash matching name
-          const cleanKeywords = encodeURIComponent(`${material || 'wooden'} ${nombre.split(' ')[0]}`);
-          finalUrl = `https://images.unsplash.com/featured/800x600/?furniture,indoor,${cleanKeywords}`;
-        }
-        
-        updateFormImage(finalUrl);
-        fFotoManual.value = finalUrl;
-        
-        aiProgressBar.style.width = '100%';
-        aiProgressPercent.textContent = '100%';
-        
-        setTimeout(() => {
-          aiProgressBox.classList.add('hidden');
-          btnGenerateAi.disabled = false;
-          btnGenerateAi.classList.remove('opacity-50', 'pointer-events-none');
-        }, 1200);
-      } else {
-        aiProgressBar.style.width = `${progress}%`;
-        aiProgressPercent.textContent = `${progress}%`;
-      }
-    }, 120);
-  });
-
   function openMuebleForm(isEdit, item = null) {
     muebleFormError.classList.add('hidden');
     muebleFormError.textContent = '';
@@ -783,7 +803,7 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleImgUploadBtn.className = "flex-1 py-2 px-2 text-[11px] font-bold rounded-lg transition-all flex items-center justify-center gap-1 bg-white text-stone-900 shadow-xs";
     toggleImgPresetsBtn.className = "flex-1 py-2 px-2 text-[11px] font-bold rounded-lg transition-all flex items-center justify-center gap-1 text-stone-500 hover:text-stone-800";
     toggleImgGenerateBtn.className = "flex-1 py-2 px-2 text-[11px] font-bold rounded-lg transition-all flex items-center justify-center gap-1 text-stone-500 hover:text-stone-800";
-    aiProgressBox.classList.add('hidden');
+    if (aiProgressBox) aiProgressBox.classList.add('hidden');
     fFileName.classList.add('hidden');
     fFileName.textContent = '';
     fFotoFile.value = '';
@@ -1550,4 +1570,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // TRIGGER FIRST BOOT RENDER
   switchTab('muebles');
+  }
 });
