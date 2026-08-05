@@ -1,12 +1,3 @@
-/**
- * Muebles los Alpes — Portal E-commerce Cliente Standalone (SENA)
- * Archivo de Lógica / Controladora JavaScript (index.js)
- */
-
-// ========================================== CONSTANTES Y DATOS INICIALES ==========================================
-
-// No se usan enlaces externos de Unsplash para evitar desajustes con las descripciones reales.
-
 const INITIAL_CLIENTES = [
   {
     id: 'cli-001',
@@ -1252,111 +1243,283 @@ function renderProfileScreen() {
   } else {
     // Show login or Registration screen
     profileContainer.innerHTML = `
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div class="max-w-4xl mx-auto bg-white border border-stone-200 rounded-3xl overflow-hidden shadow-sm">
         
-        <!-- Left panel: quick selection session -->
-        <div class="lg:col-span-4 bg-stone-50 border rounded-3xl p-5">
-          <h3 class="font-display font-black text-stone-900 text-xs mb-3 flex items-center gap-1 pb-1 border-b">
-            <i data-lucide="key" class="w-3.5 h-3.5 text-amber-800"></i>
-            Ingreso Rápido (SENA)
-          </h3>
-          <p class="text-[11px] text-stone-500 font-light mb-4 leading-relaxed">Seleccione un cliente simulado de las bases iniciales de Alpes para iniciar sesión de inmediato:</p>
+        <!-- Tab Navigation Header -->
+        <div class="flex border-b border-stone-150 bg-stone-50/70 p-1.5 gap-1.5 select-none">
+          <button id="btn-tab-credential" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-850 bg-white shadow-3xs border border-stone-100">
+            <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-800"></i>
+            <span>Iniciar Sesión</span>
+          </button>
           
-          <div class="space-y-2" id="quick-log-list">
-             <!-- Script dynamically populates clients options -->
-          </div>
+          <button id="btn-tab-register" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-850 hover:bg-stone-100">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5 text-stone-400"></i>
+            <span>Registrarse</span>
+          </button>
+          
+          <button id="btn-tab-quick" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-850 hover:bg-stone-100">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-stone-400"></i>
+            <span>Ingreso Rápido</span>
+          </button>
+          
+          <button id="btn-tab-admin" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-850 hover:bg-stone-100">
+            <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-stone-400"></i>
+            <span>Administrador</span>
+          </button>
         </div>
 
-        <!-- Right panel: register new client -->
-        <div class="lg:col-span-8 bg-white border rounded-3xl p-5">
-          <h3 class="font-display font-black text-stone-900 text-xs mb-3 flex items-center gap-1 pb-1 border-b">
-            <i data-lucide="user-plus" class="w-3.5 h-3.5 text-amber-800"></i>
-            Formulario de Registro SENA
-          </h3>
+        <div class="p-6 md:p-8">
           
-          <div id="reg-error-box" class="bg-red-50 border border-red-100 text-red-700 p-2.5 rounded-lg text-xs font-semibold mb-4 leading-tight hidden"></div>
+          <!-- PANEL 1: CLIENT CREDENTIAL LOGIN -->
+          <div id="panel-credential" class="space-y-5">
+            <div class="max-w-md mx-auto space-y-4">
+              <div class="text-center space-y-1">
+                <h3 class="font-display font-black text-stone-900 text-sm">Acceso al Portal de Clientes</h3>
+                <p class="text-stone-400 text-[11px] font-light leading-relaxed">Ingrese su correo electrónico o su número de identificación (Cédula o NIT) registrado.</p>
+              </div>
+              
+              <div id="login-error-box" class="bg-red-50 border border-red-100 text-red-750 p-3 rounded-xl text-xs font-semibold leading-relaxed hidden flex gap-2 items-start">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+                <span id="login-error-msg"></span>
+              </div>
 
-          <form id="profile-registration-form" class="space-y-3.5">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label class="text-[10px] font-bold text-stone-400 block mb-1">Tipo Documento (*)</label>
-                <select id="reg-tipodoc" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs focus:outline-none focus:border-amber-700">
-                  <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
-                  <option value="Cédula de Extranjería">Cédula de Extranjería</option>
-                  <option value="NIT">NIT (Persona Jurídica)</option>
-                  <option value="Pasaporte">Pasaporte</option>
-                </select>
-              </div>
-              <div>
-                <label id="reg-doc-label" class="text-[10px] font-bold text-stone-400 block mb-1">Número Documento (*)</label>
-                <input type="text" id="reg-numdoc" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-amber-700" placeholder="Ej. 1020456" required>
-              </div>
-              <div class="md:col-span-2">
-                <label class="text-[10px] font-bold text-stone-400 block mb-1">Nombre Completo o Razón Social (*)</label>
-                <input type="text" id="reg-nombre" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700" placeholder="Ej. Camila Restrepo" required>
-              </div>
-              <div>
-                <label class="text-[10px] font-bold text-stone-400 block mb-1">Correo Electrónico (*)</label>
-                <input type="email" id="reg-email" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-mono focus:outline-none focus:border-amber-700" placeholder="correo@ejemplo.com" required>
-              </div>
-              <div>
-                <label class="text-[10px] font-bold text-stone-400 block mb-1">Dirección (*)</label>
-                <input type="text" id="reg-direccion" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs focus:outline-none focus:border-amber-700" placeholder="Calle 12 # 4-5 Cento" required>
-              </div>
-              <div>
-                <label class="text-[10px] font-bold text-stone-400 block mb-1">Ciudad (*)</label>
-                <input type="text" id="reg-ciudad" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700" placeholder="Ej. San Gil" required>
-              </div>
-              <div>
-                <label class="text-[10px] font-bold text-stone-400 block mb-1">Departamento (*)</label>
-                <input type="text" id="reg-dep" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs focus:outline-none focus:border-amber-700" placeholder="Ej. Santander" required>
-              </div>
-              <div>
-                <label class="text-[10px] font-bold text-stone-400 block mb-1">Teléfono de Residencia (*)</label>
-                <input type="text" id="reg-telefono" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-mono focus:outline-none focus:border-amber-700" placeholder="Ej. 6012435" required>
-              </div>
-              <div>
-                <label class="text-[10px] font-bold text-stone-400 block mb-1">Teléfono Celular</label>
-                <input type="text" id="reg-celular" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-mono focus:outline-none focus:border-amber-700" placeholder="Ej. 3154561">
-              </div>
-              <div>
-                <label class="text-[10px] font-bold text-stone-400 block mb-1">Profesión / Ocupación</label>
-                <input type="text" id="reg-profesion" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs focus:outline-none focus:border-amber-700" placeholder="Ej. Administrador">
-              </div>
-              <div>
-                <label class="text-[10px] font-bold text-stone-400 block mb-1">¿Es Trabajador del Taller?</label>
-                <div class="flex items-center gap-2 h-7.5">
-                  <input type="checkbox" id="reg-empresa" class="w-4 h-4 accent-amber-800">
-                  <span class="text-xs text-stone-500 select-none">Habilitar privilegios de empleado</span>
+              <form id="client-credential-login-form" class="space-y-4">
+                <div>
+                  <label class="text-[10px] font-bold text-stone-400 block mb-1 uppercase tracking-wider">Identificación o Correo</label>
+                  <div class="relative">
+                    <i data-lucide="mail" class="absolute left-3.5 top-3 text-stone-400 w-4 h-4"></i>
+                    <input type="text" id="login-identifier" class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700 focus:bg-white transition" placeholder="Ej. 1020456789 o correo@example.com" required>
+                  </div>
                 </div>
-              </div>
+
+                <button type="submit" class="w-full bg-amber-800 hover:bg-stone-900 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
+                  Ingresar a mi Cuenta
+                </button>
+              </form>
             </div>
+          </div>
 
-            <button type="submit" class="w-full bg-stone-850 hover:bg-stone-950 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
-              Registrar Cliente e Iniciar Sesión
-            </button>
-          </form>
+          <!-- PANEL 2: CLIENT REGISTRATION -->
+          <div id="panel-register" class="hidden space-y-5">
+            <div class="space-y-4">
+              <div class="text-center space-y-1">
+                <h3 class="font-display font-black text-stone-900 text-sm">Registrar Nuevo Cliente</h3>
+                <p class="text-stone-400 text-[11px] font-light leading-relaxed">Complete los datos obligatorios para matricularse en el Registro Nacional de Muebles los Alpes.</p>
+              </div>
+
+              <div id="reg-error-box" class="bg-red-50 border border-red-100 text-red-700 p-3 rounded-xl text-xs font-semibold leading-relaxed hidden flex gap-2 items-start">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+                <span id="reg-error-msg"></span>
+              </div>
+
+              <form id="profile-registration-form" class="space-y-3.5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Tipo Documento (*)</label>
+                    <select id="reg-tipodoc" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs focus:outline-none focus:border-amber-700">
+                      <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                      <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                      <option value="NIT">NIT (Persona Jurídica)</option>
+                      <option value="Pasaporte">Pasaporte</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label id="reg-doc-label" class="text-[10px] font-bold text-stone-400 block mb-1">Número Documento (*)</label>
+                    <input type="text" id="reg-numdoc" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-amber-700" placeholder="Ej. 1020456" required>
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Nombre Completo o Razón Social (*)</label>
+                    <input type="text" id="reg-nombre" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700" placeholder="Ej. Camila Restrepo" required>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Correo Electrónico (*)</label>
+                    <input type="email" id="reg-email" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-mono focus:outline-none focus:border-amber-700" placeholder="correo@ejemplo.com" required>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Dirección (*)</label>
+                    <input type="text" id="reg-direccion" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs focus:outline-none focus:border-amber-700" placeholder="Calle 12 # 4-5 Centro" required>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Ciudad (*)</label>
+                    <input type="text" id="reg-ciudad" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700" placeholder="Ej. San Gil" required>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Departamento (*)</label>
+                    <input type="text" id="reg-dep" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs focus:outline-none focus:border-amber-700" placeholder="Ej. Santander" required>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Teléfono de Residencia (*)</label>
+                    <input type="text" id="reg-telefono" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-mono focus:outline-none focus:border-amber-700" placeholder="Ej. 6012435" required>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Teléfono Celular</label>
+                    <input type="text" id="reg-celular" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-mono focus:outline-none focus:border-amber-700" placeholder="Ej. 3154561">
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Profesión / Ocupación</label>
+                    <input type="text" id="reg-profesion" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs focus:outline-none focus:border-amber-700" placeholder="Ej. Administrador">
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">¿Es Trabajador del Taller?</label>
+                    <div class="flex items-center gap-2 h-7.5">
+                      <input type="checkbox" id="reg-empresa" class="w-4 h-4 accent-amber-800">
+                      <span class="text-xs text-stone-500 select-none font-medium">Habilitar privilegios de empleado</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" class="w-full bg-stone-850 hover:bg-stone-950 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
+                  Registrar Cliente e Iniciar Sesión
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- PANEL 3: QUICK LOGIN -->
+          <div id="panel-quick" class="hidden space-y-4">
+            <div class="text-center space-y-1 mb-2">
+              <h3 class="font-display font-black text-stone-900 text-sm">Ingreso Rápido de Simulación</h3>
+              <p class="text-stone-400 text-[11px] font-light leading-relaxed">Seleccione un cliente simulado de las bases iniciales de Alpes para iniciar sesión con un solo clic:</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="quick-log-list">
+               <!-- Script dynamically populates clients options -->
+            </div>
+          </div>
+
+          <!-- PANEL 4: ADMIN PORTAL LOGIN -->
+          <div id="panel-admin" class="hidden">
+            <div class="max-w-md mx-auto space-y-4">
+              <div class="text-center space-y-1">
+                <h3 class="font-display font-black text-stone-900 text-sm">Consola de Administración</h3>
+                <p class="text-stone-400 text-[11px] font-light leading-relaxed font-mono">Ingrese sus credenciales de taller para habilitar reportes y analítica.</p>
+              </div>
+
+              <div id="admin-error-box" class="bg-red-50 border border-red-100 text-red-700 p-3 rounded-xl text-xs font-semibold leading-relaxed hidden flex gap-2 items-start">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+                <span id="admin-error-msg"></span>
+              </div>
+
+              <form id="admin-portal-login-form" class="space-y-4">
+                <div>
+                  <label class="text-[10px] font-bold text-stone-400 block mb-1 uppercase tracking-wider">Contraseña de Administrador</label>
+                  <div class="relative">
+                    <i data-lucide="lock" class="absolute left-3.5 top-3 text-stone-400 w-4 h-4"></i>
+                    <input type="password" id="admin-password" class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700 focus:bg-white transition" placeholder="Contraseña requerida" required>
+                  </div>
+                  <span class="text-[10px] text-stone-400 mt-1 block leading-tight font-mono">💡 Simulación del Taller: use la contraseña <b>admin123</b></span>
+                </div>
+
+                <button type="submit" class="w-full bg-stone-900 hover:bg-stone-950 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
+                  Acceder a la Consola
+                </button>
+              </form>
+            </div>
+          </div>
+
         </div>
-
       </div>
     `;
+
+    // Tabs Control Logic
+    const btnTabCredential = document.getElementById('btn-tab-credential');
+    const btnTabRegister = document.getElementById('btn-tab-register');
+    const btnTabQuick = document.getElementById('btn-tab-quick');
+    const btnTabAdmin = document.getElementById('btn-tab-admin');
+
+    const panelCredential = document.getElementById('panel-credential');
+    const panelRegister = document.getElementById('panel-register');
+    const panelQuick = document.getElementById('panel-quick');
+    const panelAdmin = document.getElementById('panel-admin');
+
+    function setActiveTab(activeBtn, activePanel) {
+      [btnTabCredential, btnTabRegister, btnTabQuick, btnTabAdmin].forEach(btn => {
+        btn.className = 'flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-850 hover:bg-stone-100';
+      });
+      [panelCredential, panelRegister, panelQuick, panelAdmin].forEach(panel => {
+        panel.classList.add('hidden');
+      });
+
+      activeBtn.className = 'flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-850 bg-white shadow-3xs border border-stone-100';
+      activePanel.classList.remove('hidden');
+      
+      lucide.createIcons();
+    }
+
+    btnTabCredential.addEventListener('click', () => setActiveTab(btnTabCredential, panelCredential));
+    btnTabRegister.addEventListener('click', () => setActiveTab(btnTabRegister, panelRegister));
+    btnTabQuick.addEventListener('click', () => setActiveTab(btnTabQuick, panelQuick));
+    btnTabAdmin.addEventListener('click', () => setActiveTab(btnTabAdmin, panelAdmin));
+
+    // Form Client Credentials Login Action
+    const credentialForm = document.getElementById('client-credential-login-form');
+    const loginErrorBox = document.getElementById('login-error-box');
+    const loginErrorMsg = document.getElementById('login-error-msg');
+
+    credentialForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      loginErrorBox.classList.add('hidden');
+      
+      const identifier = document.getElementById('login-identifier').value.trim();
+      if (!identifier) return;
+
+      const foundClient = state.clientes.find(c => 
+        c.numeroDocumento === identifier || 
+        c.email.toLowerCase() === identifier.toLowerCase()
+      );
+
+      if (foundClient) {
+        state.currentCliente = foundClient;
+        saveToLocalStorage();
+        alert(`¡Bienvenido de vuelta, ${foundClient.nombreCompleto}!`);
+        if (state.carrito.length > 0) {
+          navigatetoView('cart');
+        } else {
+          navigatetoView('store');
+        }
+      } else {
+        loginErrorMsg.textContent = 'Identificación o correo electrónico incorrectos. Regístrese si no posee una cuenta.';
+        loginErrorBox.classList.remove('hidden');
+      }
+    });
+
+    // Form Admin Password Portal Login Action
+    const adminLoginForm = document.getElementById('admin-portal-login-form');
+    const adminErrorBox = document.getElementById('admin-error-box');
+    const adminErrorMsg = document.getElementById('admin-error-msg');
+
+    adminLoginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      adminErrorBox.classList.add('hidden');
+
+      const passVal = document.getElementById('admin-password').value;
+      if (passVal === 'admin123') {
+        localStorage.setItem('alpes_admin_session', 'true');
+        alert('¡Acceso concedido a la Consola Administrativa!');
+        window.location.href = 'admin.html';
+      } else {
+        adminErrorMsg.textContent = 'Contraseña incorrecta. Intente con el código de simulación del taller: admin123';
+        adminErrorBox.classList.remove('hidden');
+      }
+    });
 
     // Populate quick login list
     const quickLogWrap = document.getElementById('quick-log-list');
     state.clientes.forEach(client => {
-      const isJuridicaBadg = client.isJuridica ? '<span class="bg-amber-850 bg-amber-800 text-white text-[8px] font-black tracking-widest uppercase px-1 rounded">Corp</span>' : '';
-      const isWorkerBadg = client.perteneceEmpresa ? '<span class="bg-emerald-800 text-white text-[8px] font-black tracking-widest uppercase px-1 rounded">Emp</span>' : '';
+      const isJuridicaBadg = client.isJuridica ? '<span class="bg-amber-800 text-white text-[8px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded">Corp</span>' : '';
+      const isWorkerBadg = client.perteneceEmpresa ? '<span class="bg-emerald-800 text-white text-[8px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded">Emp</span>' : '';
       
       const qBtn = document.createElement('button');
-      qBtn.className = 'w-full text-left bg-white border border-stone-200 p-2.5 rounded-xl hover:border-amber-700 hover:bg-amber-50/20 text-stone-800 text-xs font-semibold flex items-center justify-between transition cursor-pointer';
+      qBtn.className = 'text-left bg-stone-50 border border-stone-200 p-3 rounded-2xl hover:border-amber-700 hover:bg-amber-50/15 text-stone-800 text-xs font-semibold flex items-center justify-between transition cursor-pointer';
       qBtn.innerHTML = `
-        <div>
-          <p class="font-display font-bold leading-tight flex items-center gap-1">
-            ${client.nombreCompleto} ${isJuridicaBadg} ${isWorkerBadg}
+        <div class="min-w-0 flex-1">
+          <p class="font-display font-bold leading-tight flex items-center gap-1.5 truncate">
+            <span>${client.nombreCompleto}</span>
+            <span class="inline-flex gap-1 shrink-0">${isJuridicaBadg} ${isWorkerBadg}</span>
           </p>
-          <p class="text-[9px] font-mono font-light text-stone-500 mt-0.5">ID: ${client.numeroDocumento} • ${client.ciudadResidencia}</p>
+          <p class="text-[9px] font-mono font-light text-stone-500 mt-1">ID: ${client.numeroDocumento} • ${client.ciudadResidencia}</p>
         </div>
-        <i data-lucide="chevron-right" class="w-4 h-4 text-stone-400 shrink-0"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-stone-400 shrink-0 ml-2"></i>
       `;
       
       qBtn.addEventListener('click', () => {
@@ -1392,11 +1555,11 @@ function renderProfileScreen() {
     // Handle submit registration
     const regForm = document.getElementById('profile-registration-form');
     const errorBox = document.getElementById('reg-error-box');
+    const regErrorMsg = document.getElementById('reg-error-msg');
 
     regForm.addEventListener('submit', (e) => {
       e.preventDefault();
       errorBox.classList.add('hidden');
-      errorBox.textContent = '';
 
       const tipoDocumento = regTipoDoc.value;
       const numeroDocumento = numDocInput.value.trim();
@@ -1414,7 +1577,7 @@ function renderProfileScreen() {
       // Check for document duplicates
       const duplicate = state.clientes.find(c => c.numeroDocumento === numeroDocumento);
       if (duplicate) {
-        errorBox.textContent = `CRITICAL DE VALIDACIÓN: Ya existe un registro de cliente nacional en Muebles los Alpes con el número de documento ${numeroDocumento}. Ingrese con el botón de ingreso rápido si es usted.`;
+        regErrorMsg.textContent = `Ya existe un registro de cliente nacional en Muebles los Alpes con el número de documento ${numeroDocumento}. Por favor inicie sesión.`;
         errorBox.classList.remove('hidden');
         return;
       }
@@ -1925,3 +2088,4 @@ function renderPurchasesHistory() {
 
   lucide.createIcons();
 }
+
