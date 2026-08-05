@@ -523,8 +523,8 @@
               Elegir del Taller
             </button>
             <button type="button" id="toggle-img-generate" class="flex-1 py-2 px-2 text-[11px] font-bold rounded-lg transition-all flex items-center justify-center gap-1 text-stone-500 hover:text-stone-800">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-              Generar con IA
+              <i data-lucide="link" class="w-3.5 h-3.5"></i>
+              Dirección URL
             </button>
           </div>
 
@@ -580,28 +580,13 @@
             </div>
           </div>
 
-          <!-- SECCIÓN C: GENERAR CON IA -->
+          <!-- SECCIÓN C: DIRECCIÓN URL -->
           <div id="wrapper-img-generate" class="hidden space-y-3 bg-stone-50/50 p-4 rounded-2xl border border-stone-150">
             <p class="text-[11px] text-stone-600 font-normal leading-relaxed">
-              El motor de diseño inteligente <strong>Alpes AI</strong> analizará el nombre y el material para generar/descargar una simulación fotorrealista.
+              Escriba o pegue la dirección URL de internet de la foto que desea asociar al mueble:
             </p>
-            <div class="flex flex-wrap gap-2 pt-1">
-              <button type="button" id="btn-generate-ai" class="bg-amber-800 hover:bg-stone-900 text-amber-50 text-xs font-black px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-xs cursor-pointer">
-                <i data-lucide="download-cloud" class="w-4 h-4"></i>
-                Descargar e Integrar Imagen
-              </button>
-              <input type="text" id="f-foto-manual" placeholder="O pegue una dirección URL..." class="flex-1 px-3 py-2 bg-white border border-stone-200 rounded-xl font-mono text-xs focus:outline-none focus:border-amber-700 font-normal">
-            </div>
-
-            <!-- Pre-loader and Status Logs -->
-            <div id="ai-progress-box" class="hidden space-y-2 pt-2">
-              <div class="flex justify-between items-center text-[10px] text-stone-500 font-bold font-mono">
-                <span id="ai-progress-status">Inicializando descarga...</span>
-                <span id="ai-progress-percent">0%</span>
-              </div>
-              <div class="w-full bg-stone-200 h-2 rounded-full overflow-hidden">
-                <div id="ai-progress-bar" class="bg-amber-700 h-full transition-all duration-305" style="width: 0%"></div>
-              </div>
+            <div class="flex flex-col gap-2 pt-1">
+              <input type="text" id="f-foto-manual" placeholder="https://images.unsplash.com/photo-..." class="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl font-mono text-xs focus:outline-none focus:border-amber-700 font-normal">
             </div>
           </div>
 
