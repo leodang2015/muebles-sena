@@ -30,7 +30,7 @@
          </div>
         <div>
           <h1 class="brand-title select-none">Muebles los Alpes</h1>
-          <span class="brand-subtitle">Portal de Ventas E-commerce • SENA</span>
+          <span class="brand-subtitle">Catálogo Oficial & Tienda Virtual</span>
         </div>
       </div>
 
@@ -303,18 +303,41 @@
     </div>
   </div>
 
-  <!-- PERSISTENT ACCESSIBILITY FOOTER (Taller Práctico BD SENA) -->
-  <footer class="bg-stone-950 text-stone-400 border-t border-stone-900 py-8 px-6 text-center text-xs shadow-inner">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 font-mono text-[10px]">
-      <div class="text-left leading-normal space-y-0.5">
-        <p class="font-bold text-stone-200">🪑 TALLER INTEGRADO BASES DE DATOS RELACIONALES (SENA)</p>
-        <p class="text-stone-500">Muebles los Alpes S.A. - Desarrollado mediante Plain HTML + JS Standalone (Sin dependencias externas indeseadas).</p>
+  <!-- FOOTER Y DERECHOS DE AUTOR -->
+  <footer class="bg-stone-950 text-stone-300 border-t border-stone-800 py-10 px-6 mt-12">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-xs">
+      <div>
+        <div class="flex items-center gap-2.5 mb-3">
+          <div class="w-8 h-8 rounded-full overflow-hidden border border-amber-500/40">
+            <img src="public/images/logo_alpes.jpg" onerror="this.onerror=null; this.src='public/images/logo_alpes.jpg';" alt="Logo Muebles los Alpes" class="w-full h-full object-cover">
+          </div>
+          <span class="font-display font-black text-white text-base">Muebles los Alpes</span>
+        </div>
+        <p class="text-stone-400 text-xs leading-relaxed">
+          Diseño, fabricación y comercialización de mobiliario exclusivo para espacios interiores y exteriores. Calidad artesanal y confort en cada detalle.
+        </p>
       </div>
 
-      <div class="text-right">
-        <p class="text-stone-500">Instructorado Regional Colombia • 2026</p>
-        <p class="text-[9px] text-amber-550 text-amber-500 font-bold font-mono">Cumplimiento Absoluto de Estructuras Clínicas Independientes</p>
+      <div>
+        <h4 class="font-bold text-stone-200 text-xs uppercase tracking-wider mb-3 font-mono">Navegación</h4>
+        <ul class="space-y-2 text-stone-400">
+          <li><button onclick="navigatetoView('store')" class="hover:text-amber-400 transition cursor-pointer">Catálogo de Productos</button></li>
+          <li><button onclick="navigatetoView('cart')" class="hover:text-amber-400 transition cursor-pointer">Carrito de Compras</button></li>
+          <li><a href="admin.html" class="hover:text-amber-400 transition">Consola de Administración</a></li>
+        </ul>
       </div>
+
+      <div>
+        <h4 class="font-bold text-stone-200 text-xs uppercase tracking-wider mb-3 font-mono">Contacto & Ubicación</h4>
+        <p class="text-stone-400 leading-relaxed">Bogotá, D.C. - Colombia</p>
+        <p class="text-stone-400 leading-relaxed">Línea de Atención: (601) 323-4567</p>
+        <p class="text-stone-400 leading-relaxed">Correo: contacto@muebleslosalpes.com</p>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto border-t border-stone-800/80 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-400 text-[11px]">
+      <p>&copy; 2026 Muebles los Alpes S.A.S. Todos los derechos reservados.</p>
+      <p class="text-stone-500 font-mono">Diseño & Mobiliario de Alta Gama</p>
     </div>
   </footer>
 
