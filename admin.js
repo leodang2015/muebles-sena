@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
     guardDiv.innerHTML = `
 <div class="min-h-screen bg-stone-950 text-stone-100 flex items-center justify-center p-6 relative overflow-hidden font-sans">
   <div class="absolute w-96 h-96 rounded-full bg-amber-600/10 blur-3xl -top-12 -left-12"></div>
-  <div class="absolute w-96 h-96 rounded-full bg-stone-850/20 blur-3xl -bottom-12 -right-12"></div>
+  <div class="absolute w-96 h-96 rounded-full bg-stone-800/20 blur-3xl -bottom-12 -right-12"></div>
 
   <div class="max-w-md w-full bg-stone-900 border border-stone-800 rounded-3xl p-8 shadow-2xl relative z-10 space-y-6">
     <div class="text-center space-y-3">
@@ -384,7 +384,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <form id="admin-gate-login-form" class="space-y-4">
       <div class="space-y-1.5">
-        <label class="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold block">Contraseña Administrativa</label>
+        <div class="flex items-center justify-between">
+          <label class="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold block">Contraseña Administrativa</label>
+          <span class="text-[10px] font-mono font-bold text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/50">
+            Oportunidades: <span id="admin-gate-attempts-cnt">3</span> de 3
+          </span>
+        </div>
         <div class="relative">
           <i data-lucide="lock" class="absolute left-3.5 top-3.5 text-stone-500 w-4 h-4"></i>
           <input type="password" id="admin-gate-password" class="w-full pl-10 pr-4 py-3 bg-stone-950 border border-stone-800 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/35 transition placeholder-stone-600" placeholder="••••••••" required>
@@ -392,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <p class="text-[10px] text-stone-500 mt-1 block leading-tight font-mono">Simulación de Auditoría SENA: la clave es <b>admin123</b></p>
       </div>
 
-      <button type="submit" class="w-full bg-amber-800 hover:bg-amber-700 active:bg-amber-900 text-white rounded-xl py-3 text-xs font-extrabold transition shadow-md uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1.5">
+      <button type="submit" id="admin-gate-submit-btn" class="w-full bg-amber-800 hover:bg-amber-700 active:bg-amber-900 text-white rounded-xl py-3 text-xs font-extrabold transition shadow-md uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1.5">
         <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
         <span>Autenticar y Acceder</span>
       </button>
@@ -413,24 +418,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const gateForm = document.getElementById('admin-gate-login-form');
     const gateErrorBox = document.getElementById('admin-gate-error-box');
     const gateErrorMsg = document.getElementById('admin-gate-error-msg');
+    let gateAttemptsLeft = 3;
+    let gateLockTimer = null;
 
     gateForm.addEventListener('submit', (e) => {
       e.preventDefault();
       gateErrorBox.classList.add('hidden');
 
-      const passVal = document.getElementById('admin-gate-password').value;
+      const passInput = document.getElementById('admin-gate-password');
+      const submitBtn = document.getElementById('admin-gate-submit-btn');
+      const passVal = passInput.value;
+
       if (passVal === 'admin123') {
         localStorage.setItem('alpes_admin_session', 'true');
         alert('¡Acceso administrativo concedido!');
         guardDiv.remove();
         originalChildren.forEach(child => {
-          child.classList.remove('hidden');
+          // Do not unhide modals on login restoration
+          if (!child.id || !child.id.startsWith('modal-')) {
+            child.classList.remove('hidden');
+          }
         });
         // Boot normal admin app
         bootAdminApp();
       } else {
-        gateErrorMsg.textContent = 'Contraseña incorrecta. Intente con el código de simulación: admin123';
-        gateErrorBox.classList.remove('hidden');
+        gateAttemptsLeft--;
+        document.getElementById('admin-gate-attempts-cnt').textContent = gateAttemptsLeft;
+
+        if (gateAttemptsLeft > 0) {
+          gateErrorMsg.textContent = `Contraseña incorrecta. Le quedan ${gateAttemptsLeft} de 3 oportunidades. Simulación SENA: la clave es admin123`;
+          gateErrorBox.classList.remove('hidden');
+        } else {
+          passInput.disabled = true;
+          submitBtn.disabled = true;
+          submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+          let secondsLeft = 30;
+          gateErrorMsg.textContent = `¡Ha agotado las 3 oportunidades! Por seguridad, la consola está bloqueada. Reintente en ${secondsLeft} segundos.`;
+          gateErrorBox.classList.remove('hidden');
+
+          gateLockTimer = setInterval(() => {
+            secondsLeft--;
+            if (secondsLeft > 0) {
+              gateErrorMsg.textContent = `¡Ha agotado las 3 oportunidades! Por seguridad, la consola está bloqueada. Reintente en ${secondsLeft} segundos.`;
+            } else {
+              clearInterval(gateLockTimer);
+              gateAttemptsLeft = 3;
+              document.getElementById('admin-gate-attempts-cnt').textContent = '3';
+              passInput.disabled = false;
+              submitBtn.disabled = false;
+              submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+              passInput.value = '';
+              gateErrorMsg.textContent = 'Bloqueo finalizado. Dispone de 3 nuevas oportunidades para intentar ingresar.';
+              gateErrorBox.classList.remove('hidden');
+            }
+          }, 1000);
+        }
       }
     });
   } else {
@@ -445,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const widgetsWrap = document.querySelector('.admin-widgets');
     if (widgetsWrap) {
       const logoutBtn = document.createElement('button');
-      logoutBtn.className = 'admin-btn-reset bg-red-650 hover:bg-red-750 text-white flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer';
+      logoutBtn.className = 'admin-btn-reset bg-red-700 hover:bg-red-800 text-white flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer';
       logoutBtn.style.backgroundColor = '#b91c1c';
       logoutBtn.style.color = '#ffffff';
       logoutBtn.innerHTML = `
