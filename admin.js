@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <i data-lucide="lock" class="absolute left-3.5 top-3.5 text-stone-500 w-4 h-4"></i>
           <input type="password" id="admin-gate-password" class="w-full pl-10 pr-4 py-3 bg-stone-950 border border-stone-800 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/35 transition placeholder-stone-600" placeholder="••••••••" required>
         </div>
-        <p class="text-[10px] text-stone-500 mt-1 block leading-tight font-mono">Simulación de Auditoría SENA: la clave es <b>admin123</b></p>
+        <p class="text-[10px] text-stone-500 mt-1 block leading-tight font-mono">Clave por defecto de consola: <b>admin123</b></p>
       </div>
 
       <button type="submit" id="admin-gate-submit-btn" class="w-full bg-amber-800 hover:bg-amber-700 active:bg-amber-900 text-white rounded-xl py-3 text-xs font-extrabold transition shadow-md uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1.5">
@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('admin-gate-attempts-cnt').textContent = gateAttemptsLeft;
 
         if (gateAttemptsLeft > 0) {
-          gateErrorMsg.textContent = `Contraseña incorrecta. Le quedan ${gateAttemptsLeft} de 3 oportunidades. Simulación SENA: la clave es admin123`;
+          gateErrorMsg.textContent = `Contraseña incorrecta. Le quedan ${gateAttemptsLeft} de 3 oportunidades. Clave por defecto: admin123`;
           gateErrorBox.classList.remove('hidden');
         } else {
           passInput.disabled = true;
@@ -1615,3 +1615,4 @@ document.addEventListener('DOMContentLoaded', () => {
   switchTab('muebles');
   }
 });
+
