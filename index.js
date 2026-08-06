@@ -1708,7 +1708,7 @@ function renderProfileScreen() {
                     <i data-lucide="lock" class="absolute left-3.5 top-3 text-stone-400 w-4 h-4"></i>
                     <input type="password" id="admin-password" class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700 focus:bg-white transition" placeholder="Contraseña requerida" required>
                   </div>
-                  <span class="text-[10px] text-stone-400 mt-1 block leading-tight font-mono">💡 Simulación del Taller: use la contraseña <b>admin123</b></span>
+                  <span class="text-[10px] text-stone-400 mt-1 block leading-tight font-mono">💡 Clave por defecto de consola: <b>admin123</b></span>
                 </div>
 
                 <button type="submit" id="btn-submit-admin-portal" class="w-full bg-stone-900 hover:bg-stone-950 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
@@ -1854,7 +1854,7 @@ function renderProfileScreen() {
         document.getElementById('admin-portal-attempts-cnt').textContent = adminPortalAttemptsLeft;
 
         if (adminPortalAttemptsLeft > 0) {
-          adminErrorMsg.textContent = `Contraseña incorrecta. Le quedan ${adminPortalAttemptsLeft} de 3 oportunidades. Simulación SENA: admin123`;
+          adminErrorMsg.textContent = `Contraseña incorrecta. Le quedan ${adminPortalAttemptsLeft} de 3 oportunidades. Clave por defecto: admin123`;
           adminErrorBox.classList.remove('hidden');
         } else {
           passInput.disabled = true;
@@ -1906,7 +1906,7 @@ function renderProfileScreen() {
       
       qBtn.addEventListener('click', () => {
         let attempts = 3;
-        let passInput = prompt(`Autenticación requerida para ${client.nombreCompleto}.\nIngrese su contraseña (Simulación SENA: alpes123):\nOportunidades restantes: ${attempts} de 3`);
+        let passInput = prompt(`Autenticación requerida para ${client.nombreCompleto}.\nIngrese su contraseña (Clave por defecto: alpes123):\nOportunidades restantes: ${attempts} de 3`);
         
         while (passInput !== null) {
           const expected = client.password || 'alpes123';
@@ -2501,3 +2501,4 @@ function renderPurchasesHistory() {
 
   lucide.createIcons();
 }
+
