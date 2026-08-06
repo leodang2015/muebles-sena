@@ -4,6 +4,7 @@ const INITIAL_CLIENTES = [
     tipoDocumento: 'Cédula de Ciudadanía',
     numeroDocumento: '1020456789',
     nombreCompleto: 'Camila Restrepo',
+    password: 'alpes123',
     telefonoResidencia: '6013234567',
     telefonoCelular: '3157894561',
     direccion: 'Carrera 15 # 85-12',
@@ -20,6 +21,7 @@ const INITIAL_CLIENTES = [
     tipoDocumento: 'Cédula de Ciudadanía',
     numeroDocumento: '91234567',
     nombreCompleto: 'Carlos Gómez',
+    password: 'alpes123',
     telefonoResidencia: '6077245678',
     telefonoCelular: '3004567890',
     direccion: 'Calle 12 # 4-50 Centro',
@@ -36,6 +38,7 @@ const INITIAL_CLIENTES = [
     tipoDocumento: 'NIT',
     numeroDocumento: '900123456-1',
     nombreCompleto: 'Constructora Alpes S.A.S.',
+    password: 'alpes123',
     telefonoResidencia: '6024889900',
     telefonoCelular: '3112223344',
     direccion: 'Avenida Sexta Norte # 22N-50',
@@ -53,6 +56,7 @@ const INITIAL_CLIENTES = [
     tipoDocumento: 'Cédula de Ciudadanía',
     numeroDocumento: '43567890',
     nombreCompleto: 'Diana Ospina',
+    password: 'alpes123',
     telefonoResidencia: '6042661122',
     telefonoCelular: '3109876543',
     direccion: 'Calle 10 # 36-24 El Poblado',
@@ -274,6 +278,49 @@ const INITIAL_PEDIDOS = [
   }
 ];
 
+const INITIAL_COMENTARIOS = [
+  {
+    id: 'com-001',
+    referencia: 'MESONAT001',
+    autor: 'Camila Restrepo',
+    calificacion: 5,
+    texto: 'Excelente calidad de la madera y acabados impecables. El tono natural le da mucha calidez a mi comedor.',
+    fecha: '2026-07-15'
+  },
+  {
+    id: 'com-002',
+    referencia: 'MESONAT001',
+    autor: 'Andrés Gómez',
+    calificacion: 5,
+    texto: 'Muy robusta y de acabados finos estilo griego. Llegó perfectamente empacada a Medellín.',
+    fecha: '2026-08-01'
+  },
+  {
+    id: 'com-003',
+    referencia: 'SOFAEXT002',
+    autor: 'Felipe Morales',
+    calificacion: 5,
+    texto: 'Ideal para la terraza de la finca. El mimbre sintético aguanta lluvia y sol sin decolorarse.',
+    fecha: '2026-07-28'
+  },
+  {
+    id: 'com-004',
+    referencia: 'CRECLAS001',
+    autor: 'Constructora Alpes S.A.S.',
+    calificacion: 5,
+    texto: 'Espectacular credenza. Las molduras neoclásicas se ven muy elegantes en la sala de juntas.',
+    fecha: '2026-06-25'
+  },
+  {
+    id: 'com-005',
+    referencia: 'SILAGRI001',
+    autor: 'Diana Ospina',
+    calificacion: 4,
+    texto: 'Muy cómoda y el tapizado damasco en dorado es hermoso. Superó mis expectativas.',
+    fecha: '2026-07-04'
+  }
+];
+
 
 // ========================================== STATE MANAGEMENT ==========================================
 
@@ -281,6 +328,7 @@ let state = {
   muebles: [],
   clientes: [],
   pedidos: [],
+  comentarios: [],
   currentCliente: null,
   carrito: [],
   
@@ -341,6 +389,13 @@ function initDB() {
   }
 
   try {
+    const savedComentarios = localStorage.getItem('alpes_comentarios');
+    state.comentarios = savedComentarios ? JSON.parse(savedComentarios) : INITIAL_COMENTARIOS;
+  } catch (e) {
+    state.comentarios = INITIAL_COMENTARIOS;
+  }
+
+  try {
     const savedCurrent = localStorage.getItem('alpes_current_cliente');
     state.currentCliente = savedCurrent ? JSON.parse(savedCurrent) : null;
   } catch (e) {
@@ -361,6 +416,7 @@ function saveToLocalStorage() {
   localStorage.setItem('alpes_muebles', JSON.stringify(state.muebles));
   localStorage.setItem('alpes_clientes', JSON.stringify(state.clientes));
   localStorage.setItem('alpes_pedidos', JSON.stringify(state.pedidos));
+  localStorage.setItem('alpes_comentarios', JSON.stringify(state.comentarios));
   
   if (state.currentCliente) {
     localStorage.setItem('alpes_current_cliente', JSON.stringify(state.currentCliente));
@@ -369,6 +425,31 @@ function saveToLocalStorage() {
   }
   
   localStorage.setItem('alpes_carrito', JSON.stringify(state.carrito));
+}
+
+// Helpers for Ratings and Comments
+function getProductComments(referencia) {
+  return (state.comentarios || []).filter(c => c.referencia === referencia);
+}
+
+function getProductRating(referencia) {
+  const list = getProductComments(referencia);
+  if (list.length === 0) return { avg: 5.0, count: 0 };
+  const sum = list.reduce((acc, c) => acc + c.calificacion, 0);
+  const avg = (sum / list.length).toFixed(1);
+  return { avg: parseFloat(avg), count: list.length };
+}
+
+function starsHTML(n) {
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    if (i <= n) {
+      html += `<i data-lucide="star" class="w-4 h-4 text-amber-500 fill-amber-400 inline"></i>`;
+    } else {
+      html += `<i data-lucide="star" class="w-4 h-4 text-stone-300 inline"></i>`;
+    }
+  }
+  return html;
 }
 
 // Format COP Currency
@@ -499,13 +580,12 @@ function renderGlobalHeaderState() {
     document.getElementById('hdr-btn-profile').addEventListener('click', () => navigatetoView('profile'));
     document.getElementById('hdr-btn-purchases').addEventListener('click', () => navigatetoView('purchases'));
     document.getElementById('hdr-btn-logout').addEventListener('click', () => {
-      if (confirm('¿Desea cerrar la sesión de su cuenta de cliente actual?')) {
-        state.currentCliente = null;
-        state.carrito = [];
-        saveToLocalStorage();
-        alert('Sesión cerrada con éxito.');
-        navigatetoView('store');
-      }
+      state.currentCliente = null;
+      state.carrito = [];
+      saveToLocalStorage();
+      renderGlobalHeaderState();
+      alert('Sesión cerrada con éxito.');
+      navigatetoView('store');
     });
 
   } else {
@@ -657,7 +737,8 @@ function renderStoreGrid() {
     card.id = `mueble-card-${mueble.referencia}`;
     card.className = 'bg-white border border-stone-200 rounded-3xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group h-full';
     
-    // Build availability indicators
+    // Build availability indicators & rating data
+    const ratingData = getProductRating(mueble.referencia);
     let labelBadge = '';
     let stockOverlay = '';
     
@@ -685,6 +766,11 @@ function renderStoreGrid() {
         >
         <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-xs text-[10px] uppercase tracking-widest font-black font-display text-stone-800 py-1 px-3 rounded-full shadow-xs z-10 border border-stone-200/50">
           ${mueble.tipo}
+        </div>
+        <div class="absolute top-3 right-3 bg-stone-900/80 backdrop-blur-xs text-amber-400 text-[10px] font-bold py-1 px-2.5 rounded-full shadow-xs z-10 border border-stone-700/60 flex items-center gap-1 font-mono">
+          <i data-lucide="star" class="w-3 h-3 fill-amber-400"></i>
+          <span>${ratingData.avg}</span>
+          <span class="text-stone-300">(${ratingData.count})</span>
         </div>
         ${labelBadge}
         ${stockOverlay}
@@ -721,10 +807,10 @@ function renderStoreGrid() {
           <div class="flex items-center gap-1.5">
             <button
               id="c-view-btn-${mueble.referencia}"
-              class="flex-1 bg-stone-100 hover:bg-amber-50 hover:text-amber-900 text-stone-700 text-xs font-semibold py-2.5 rounded-xl transition border border-transparent hover:border-amber-200/60 flex items-center justify-center gap-1 cursor-pointer"
+              class="flex-1 bg-stone-100 hover:bg-amber-50 hover:text-amber-900 text-stone-700 text-xs font-semibold py-2.5 rounded-xl transition border border-transparent hover:border-amber-200/60 flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <i data-lucide="info" class="w-3.5 h-3.5"></i>
-              Detalles
+              <i data-lucide="message-square" class="w-3.5 h-3.5 text-amber-700"></i>
+              Ver & Opinar
             </button>
             ${mueble.stock > 0 ? `
               <button
@@ -775,6 +861,47 @@ function renderDetailedProduct() {
   }
 
   const container = document.getElementById('detailed-content');
+  const productComments = getProductComments(m.referencia);
+  const ratingInfo = getProductRating(m.referencia);
+
+  let commentsHTML = '';
+  if (productComments.length === 0) {
+    commentsHTML = `
+      <div class="bg-stone-50 border border-dashed border-stone-200 rounded-3xl p-8 text-center space-y-2">
+        <div class="w-12 h-12 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-2">
+          <i data-lucide="message-square-plus" class="w-6 h-6"></i>
+        </div>
+        <h4 class="font-display font-bold text-stone-800 text-sm">Aún no hay opiniones sobre este mueble</h4>
+        <p class="text-xs text-stone-500 font-light max-w-sm mx-auto">Sé la primera persona en calificar este diseño y dejar un comentario para la comunidad SENA.</p>
+      </div>
+    `;
+  } else {
+    commentsHTML = productComments.map(c => `
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-3xs space-y-2.5">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-amber-900 text-amber-100 font-black text-xs flex items-center justify-center font-display border border-amber-800 shadow-3xs shrink-0">
+              ${c.autor ? c.autor.charAt(0).toUpperCase() : 'A'}
+            </div>
+            <div>
+              <span class="font-bold text-xs text-stone-900 block leading-tight font-display">${c.autor}</span>
+              <span class="text-[9px] text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.2 rounded font-mono font-semibold">Cliente Verificado</span>
+            </div>
+          </div>
+          <span class="text-[10px] text-stone-400 font-mono font-medium">${c.fecha}</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 text-amber-500">
+          ${starsHTML(c.calificacion)}
+          <span class="text-[10px] font-bold text-stone-600 font-mono ml-1">${c.calificacion}/5</span>
+        </div>
+
+        <p class="text-xs text-stone-700 leading-relaxed font-normal bg-stone-50/60 p-3 rounded-xl border border-stone-100">
+          "${c.texto}"
+        </p>
+      </div>
+    `).join('');
+  }
   
   let buyControls = '';
   if (m.stock > 0) {
@@ -898,6 +1025,85 @@ function renderDetailedProduct() {
         </div>
       </div>
     </div>
+
+    <!-- SECCIÓN DE OPINIONES Y COMENTARIOS DE CLIENTES -->
+    <div class="mt-12 pt-8 border-t border-stone-200 space-y-8">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-stone-900 text-stone-100 p-6 rounded-3xl shadow-sm">
+        <div class="flex items-center gap-4">
+          <div class="bg-amber-600/30 text-amber-400 p-3.5 rounded-2xl border border-amber-500/20 shrink-0">
+            <i data-lucide="message-square" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-black text-xl text-white">Opiniones y Comentarios de Clientes</h3>
+            <p class="text-xs text-stone-400 font-light mt-0.5">Valoraciones reales verificadas para la referencia ${m.referencia}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 bg-stone-950 px-5 py-3 rounded-2xl border border-stone-800 shrink-0">
+          <div class="text-3xl font-black text-amber-400 font-display">${ratingInfo.avg}</div>
+          <div>
+            <div class="flex items-center gap-0.5 text-amber-400">
+              ${starsHTML(Math.round(ratingInfo.avg))}
+            </div>
+            <span class="text-[10px] text-stone-400 font-mono font-bold block mt-0.5">${ratingInfo.count} ${ratingInfo.count === 1 ? 'opinión' : 'opiniones'}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- FORMULARIO DE NUEVO COMENTARIO -->
+        <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-stone-200 shadow-xs space-y-4">
+          <h4 class="font-display font-bold text-stone-900 text-sm flex items-center gap-2">
+            <i data-lucide="edit-3" class="w-4 h-4 text-amber-700"></i>
+            Escribir un Comentario
+          </h4>
+          <p class="text-xs text-stone-500 font-light leading-relaxed">Comparta su experiencia de uso o sugerencias sobre este producto.</p>
+          
+          <form id="comment-form" class="space-y-4">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">Calificación (*)</label>
+              <div class="flex items-center gap-1.5" id="star-picker-container">
+                <button type="button" data-star="1" class="star-pick-btn p-1 text-amber-500 transition cursor-pointer">
+                  <i data-lucide="star" class="w-6 h-6 fill-amber-400"></i>
+                </button>
+                <button type="button" data-star="2" class="star-pick-btn p-1 text-amber-500 transition cursor-pointer">
+                  <i data-lucide="star" class="w-6 h-6 fill-amber-400"></i>
+                </button>
+                <button type="button" data-star="3" class="star-pick-btn p-1 text-amber-500 transition cursor-pointer">
+                  <i data-lucide="star" class="w-6 h-6 fill-amber-400"></i>
+                </button>
+                <button type="button" data-star="4" class="star-pick-btn p-1 text-amber-500 transition cursor-pointer">
+                  <i data-lucide="star" class="w-6 h-6 fill-amber-400"></i>
+                </button>
+                <button type="button" data-star="5" class="star-pick-btn p-1 text-amber-500 transition cursor-pointer">
+                  <i data-lucide="star" class="w-6 h-6 fill-amber-400"></i>
+                </button>
+              </div>
+              <input type="hidden" id="comment-rating-val" value="5">
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1">Nombre o Apodo (*)</label>
+              <input type="text" id="comment-author-input" required class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700" placeholder="Ej. Carlos Mendoza" value="${state.currentCliente ? state.currentCliente.nombreCompleto : ''}">
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1">Comentario u Opinión (*)</label>
+              <textarea id="comment-text-input" required rows="3" class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal focus:outline-none focus:border-amber-700" placeholder="Escriba aquí los detalles de su experiencia con este mueble..."></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-amber-800 hover:bg-stone-900 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-xs flex items-center justify-center gap-2 cursor-pointer">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              Publicar Opinión
+            </button>
+          </form>
+        </div>
+
+        <!-- LISTA DE COMENTARIOS PUBLICADOS -->
+        <div class="lg:col-span-7 space-y-3">
+          ${commentsHTML}
+        </div>
+      </div>
+    </div>
   `;
 
   // Bind quantifiers click listeners
@@ -922,6 +1128,73 @@ function renderDetailedProduct() {
 
     document.getElementById('det-add-cart-btn').addEventListener('click', () => {
       addItemToShoppingBag(m.referencia, state.buyQty);
+    });
+  }
+
+  // Star rating selector logic
+  const starBtns = document.querySelectorAll('.star-pick-btn');
+  starBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const starNum = parseInt(btn.getAttribute('data-star'), 10);
+      const ratingHiddenInput = document.getElementById('comment-rating-val');
+      if (ratingHiddenInput) ratingHiddenInput.value = starNum;
+      
+      starBtns.forEach(sb => {
+        const sVal = parseInt(sb.getAttribute('data-star'), 10);
+        const icon = sb.querySelector('i');
+        if (sVal <= starNum) {
+          sb.classList.remove('text-stone-300');
+          sb.classList.add('text-amber-500');
+          if (icon) {
+            icon.classList.add('fill-amber-400');
+          }
+        } else {
+          sb.classList.remove('text-amber-500');
+          sb.classList.add('text-stone-300');
+          if (icon) {
+            icon.classList.remove('fill-amber-400');
+          }
+        }
+      });
+    });
+  });
+
+  // Comment Form Submit Handler
+  const commentForm = document.getElementById('comment-form');
+  if (commentForm) {
+    commentForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const authorInput = document.getElementById('comment-author-input');
+      const textInput = document.getElementById('comment-text-input');
+      const ratingInput = document.getElementById('comment-rating-val');
+      
+      const autorVal = authorInput ? authorInput.value.trim() : '';
+      const textoVal = textInput ? textInput.value.trim() : '';
+      const ratingVal = ratingInput ? (parseInt(ratingInput.value, 10) || 5) : 5;
+      
+      if (!autorVal) {
+        alert('Por favor ingrese su nombre o apodo.');
+        return;
+      }
+      if (!textoVal || textoVal.length < 3) {
+        alert('Por favor ingrese un comentario válido (mínimo 3 caracteres).');
+        return;
+      }
+
+      const newCom = {
+        id: 'com-' + Date.now(),
+        referencia: m.referencia,
+        autor: autorVal,
+        calificacion: ratingVal,
+        texto: textoVal,
+        fecha: new Date().toISOString().split('T')[0]
+      };
+
+      state.comentarios.unshift(newCom);
+      saveToLocalStorage();
+      
+      // Re-render detailed product view to update comments and rating average
+      renderDetailedProduct();
     });
   }
 
@@ -1236,6 +1509,7 @@ function renderProfileScreen() {
       state.currentCliente = null;
       state.carrito = [];
       saveToLocalStorage();
+      renderGlobalHeaderState();
       alert('Se cerró la sesión correctamente.');
       navigatetoView('store');
     });
@@ -1246,23 +1520,23 @@ function renderProfileScreen() {
       <div class="max-w-4xl mx-auto bg-white border border-stone-200 rounded-3xl overflow-hidden shadow-sm">
         
         <!-- Tab Navigation Header -->
-        <div class="flex border-b border-stone-150 bg-stone-50/70 p-1.5 gap-1.5 select-none">
-          <button id="btn-tab-credential" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-850 bg-white shadow-3xs border border-stone-100">
+        <div class="flex border-b border-stone-200 bg-stone-50/70 p-1.5 gap-1.5 select-none">
+          <button id="btn-tab-credential" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-900 bg-white shadow-3xs border border-stone-100">
             <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-800"></i>
             <span>Iniciar Sesión</span>
           </button>
           
-          <button id="btn-tab-register" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-850 hover:bg-stone-100">
+          <button id="btn-tab-register" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100">
             <i data-lucide="user-plus" class="w-3.5 h-3.5 text-stone-400"></i>
             <span>Registrarse</span>
           </button>
           
-          <button id="btn-tab-quick" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-850 hover:bg-stone-100">
+          <button id="btn-tab-quick" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100">
             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-stone-400"></i>
             <span>Ingreso Rápido</span>
           </button>
           
-          <button id="btn-tab-admin" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-850 hover:bg-stone-100">
+          <button id="btn-tab-admin" type="button" class="flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100">
             <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-stone-400"></i>
             <span>Administrador</span>
           </button>
@@ -1275,24 +1549,38 @@ function renderProfileScreen() {
             <div class="max-w-md mx-auto space-y-4">
               <div class="text-center space-y-1">
                 <h3 class="font-display font-black text-stone-900 text-sm">Acceso al Portal de Clientes</h3>
-                <p class="text-stone-400 text-[11px] font-light leading-relaxed">Ingrese su correo electrónico o su número de identificación (Cédula o NIT) registrado.</p>
+                <p class="text-stone-400 text-[11px] font-light leading-relaxed">Ingrese sus credenciales de cliente registrado (Cédula/NIT y contraseña).</p>
               </div>
               
-              <div id="login-error-box" class="bg-red-50 border border-red-100 text-red-750 p-3 rounded-xl text-xs font-semibold leading-relaxed hidden flex gap-2 items-start">
+              <div id="login-error-box" class="bg-red-50 border border-red-100 text-red-700 p-3 rounded-xl text-xs font-semibold leading-relaxed hidden flex gap-2 items-start">
                 <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
                 <span id="login-error-msg"></span>
               </div>
 
               <form id="client-credential-login-form" class="space-y-4">
                 <div>
-                  <label class="text-[10px] font-bold text-stone-400 block mb-1 uppercase tracking-wider">Identificación o Correo</label>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-[10px] font-bold text-stone-400 block uppercase tracking-wider">Identificación o Correo (*)</label>
+                    <span class="text-[10px] font-mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      Oportunidades: <span id="client-login-attempts-cnt">3</span> de 3
+                    </span>
+                  </div>
                   <div class="relative">
                     <i data-lucide="mail" class="absolute left-3.5 top-3 text-stone-400 w-4 h-4"></i>
                     <input type="text" id="login-identifier" class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700 focus:bg-white transition" placeholder="Ej. 1020456789 o correo@example.com" required>
                   </div>
                 </div>
 
-                <button type="submit" class="w-full bg-amber-800 hover:bg-stone-900 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
+                <div>
+                  <label class="text-[10px] font-bold text-stone-400 block mb-1 uppercase tracking-wider">Contraseña de Acceso (*)</label>
+                  <div class="relative">
+                    <i data-lucide="lock" class="absolute left-3.5 top-3 text-stone-400 w-4 h-4"></i>
+                    <input type="password" id="login-password" class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700 focus:bg-white transition" placeholder="••••••••" required>
+                  </div>
+                  <span class="text-[10px] text-stone-400 mt-1 block leading-tight font-mono">💡 Cuentas iniciales del sistema: clave <b>alpes123</b></span>
+                </div>
+
+                <button type="submit" id="btn-submit-client-login" class="w-full bg-amber-800 hover:bg-stone-900 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
                   Ingresar a mi Cuenta
                 </button>
               </form>
@@ -1304,7 +1592,7 @@ function renderProfileScreen() {
             <div class="space-y-4">
               <div class="text-center space-y-1">
                 <h3 class="font-display font-black text-stone-900 text-sm">Registrar Nuevo Cliente</h3>
-                <p class="text-stone-400 text-[11px] font-light leading-relaxed">Complete los datos obligatorios para matricularse en el Registro Nacional de Muebles los Alpes.</p>
+                <p class="text-stone-400 text-[11px] font-light leading-relaxed">Complete los datos obligatorios y defina su contraseña para matricularse en Muebles los Alpes.</p>
               </div>
 
               <div id="reg-error-box" class="bg-red-50 border border-red-100 text-red-700 p-3 rounded-xl text-xs font-semibold leading-relaxed hidden flex gap-2 items-start">
@@ -1330,6 +1618,14 @@ function renderProfileScreen() {
                   <div class="md:col-span-2">
                     <label class="text-[10px] font-bold text-stone-400 block mb-1">Nombre Completo o Razón Social (*)</label>
                     <input type="text" id="reg-nombre" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700" placeholder="Ej. Camila Restrepo" required>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Crear Contraseña (*)</label>
+                    <input type="password" id="reg-password" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700" placeholder="Mínimo 4 caracteres" required minlength="4">
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-stone-400 block mb-1">Confirmar Contraseña (*)</label>
+                    <input type="password" id="reg-confirm-password" class="w-full px-2.5 py-1.5 bg-stone-50 border rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700" placeholder="Repita la contraseña" required minlength="4">
                   </div>
                   <div>
                     <label class="text-[10px] font-bold text-stone-400 block mb-1">Correo Electrónico (*)</label>
@@ -1368,7 +1664,7 @@ function renderProfileScreen() {
                   </div>
                 </div>
 
-                <button type="submit" class="w-full bg-stone-850 hover:bg-stone-950 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
+                <button type="submit" class="w-full bg-amber-800 hover:bg-stone-900 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
                   Registrar Cliente e Iniciar Sesión
                 </button>
               </form>
@@ -1379,7 +1675,7 @@ function renderProfileScreen() {
           <div id="panel-quick" class="hidden space-y-4">
             <div class="text-center space-y-1 mb-2">
               <h3 class="font-display font-black text-stone-900 text-sm">Ingreso Rápido de Simulación</h3>
-              <p class="text-stone-400 text-[11px] font-light leading-relaxed">Seleccione un cliente simulado de las bases iniciales de Alpes para iniciar sesión con un solo clic:</p>
+              <p class="text-stone-400 text-[11px] font-light leading-relaxed">Seleccione un cliente simulado de las bases iniciales de Alpes para iniciar sesión (autenticación rápida):</p>
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="quick-log-list">
@@ -1402,7 +1698,12 @@ function renderProfileScreen() {
 
               <form id="admin-portal-login-form" class="space-y-4">
                 <div>
-                  <label class="text-[10px] font-bold text-stone-400 block mb-1 uppercase tracking-wider">Contraseña de Administrador</label>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-[10px] font-bold text-stone-400 block uppercase tracking-wider">Contraseña de Administrador (*)</label>
+                    <span class="text-[10px] font-mono font-bold text-stone-800 bg-stone-100 px-2 py-0.5 rounded border border-stone-200">
+                      Oportunidades: <span id="admin-portal-attempts-cnt">3</span> de 3
+                    </span>
+                  </div>
                   <div class="relative">
                     <i data-lucide="lock" class="absolute left-3.5 top-3 text-stone-400 w-4 h-4"></i>
                     <input type="password" id="admin-password" class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-700 focus:bg-white transition" placeholder="Contraseña requerida" required>
@@ -1410,7 +1711,7 @@ function renderProfileScreen() {
                   <span class="text-[10px] text-stone-400 mt-1 block leading-tight font-mono">💡 Simulación del Taller: use la contraseña <b>admin123</b></span>
                 </div>
 
-                <button type="submit" class="w-full bg-stone-900 hover:bg-stone-950 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
+                <button type="submit" id="btn-submit-admin-portal" class="w-full bg-stone-900 hover:bg-stone-950 text-white rounded-xl px-4 py-2.5 text-xs font-extrabold transition shadow-sm uppercase tracking-widest cursor-pointer">
                   Acceder a la Consola
                 </button>
               </form>
@@ -1434,13 +1735,13 @@ function renderProfileScreen() {
 
     function setActiveTab(activeBtn, activePanel) {
       [btnTabCredential, btnTabRegister, btnTabQuick, btnTabAdmin].forEach(btn => {
-        btn.className = 'flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-850 hover:bg-stone-100';
+        btn.className = 'flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100';
       });
       [panelCredential, panelRegister, panelQuick, panelAdmin].forEach(panel => {
         panel.classList.add('hidden');
       });
 
-      activeBtn.className = 'flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-850 bg-white shadow-3xs border border-stone-100';
+      activeBtn.className = 'flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 text-stone-900 bg-white shadow-3xs border border-stone-100';
       activePanel.classList.remove('hidden');
       
       lucide.createIcons();
@@ -1451,55 +1752,136 @@ function renderProfileScreen() {
     btnTabQuick.addEventListener('click', () => setActiveTab(btnTabQuick, panelQuick));
     btnTabAdmin.addEventListener('click', () => setActiveTab(btnTabAdmin, panelAdmin));
 
-    // Form Client Credentials Login Action
+    // Form Client Credentials Login Action (3 Attempts Security Guard)
     const credentialForm = document.getElementById('client-credential-login-form');
     const loginErrorBox = document.getElementById('login-error-box');
     const loginErrorMsg = document.getElementById('login-error-msg');
+    let clientAttemptsLeft = 3;
+    let clientLockTimer = null;
 
     credentialForm.addEventListener('submit', (e) => {
       e.preventDefault();
       loginErrorBox.classList.add('hidden');
       
       const identifier = document.getElementById('login-identifier').value.trim();
-      if (!identifier) return;
+      const passVal = document.getElementById('login-password').value;
+      const submitBtn = document.getElementById('btn-submit-client-login');
+      const idInput = document.getElementById('login-identifier');
+      const passInput = document.getElementById('login-password');
+
+      if (!identifier || !passVal) return;
 
       const foundClient = state.clientes.find(c => 
         c.numeroDocumento === identifier || 
         c.email.toLowerCase() === identifier.toLowerCase()
       );
 
-      if (foundClient) {
+      if (!foundClient) {
+        loginErrorMsg.textContent = 'No existe una cuenta registrada con esa identificación o correo electrónico. Por favor regístrese.';
+        loginErrorBox.classList.remove('hidden');
+        return;
+      }
+
+      const expectedPass = foundClient.password || 'alpes123';
+      if (passVal === expectedPass) {
         state.currentCliente = foundClient;
         saveToLocalStorage();
-        alert(`¡Bienvenido de vuelta, ${foundClient.nombreCompleto}!`);
+        alert(`¡Autenticación exitosa! Bienvenido de vuelta, ${foundClient.nombreCompleto}.`);
         if (state.carrito.length > 0) {
           navigatetoView('cart');
         } else {
           navigatetoView('store');
         }
       } else {
-        loginErrorMsg.textContent = 'Identificación o correo electrónico incorrectos. Regístrese si no posee una cuenta.';
-        loginErrorBox.classList.remove('hidden');
+        clientAttemptsLeft--;
+        document.getElementById('client-login-attempts-cnt').textContent = clientAttemptsLeft;
+
+        if (clientAttemptsLeft > 0) {
+          loginErrorMsg.textContent = `Contraseña incorrecta. Le quedan ${clientAttemptsLeft} de 3 oportunidades. Clave inicial: alpes123`;
+          loginErrorBox.classList.remove('hidden');
+        } else {
+          idInput.disabled = true;
+          passInput.disabled = true;
+          submitBtn.disabled = true;
+          submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+          let secondsLeft = 30;
+          loginErrorMsg.textContent = `¡Ha superado las 3 oportunidades! Por seguridad, el sistema está bloqueado por ${secondsLeft} segundos.`;
+          loginErrorBox.classList.remove('hidden');
+
+          clientLockTimer = setInterval(() => {
+            secondsLeft--;
+            if (secondsLeft > 0) {
+              loginErrorMsg.textContent = `¡Ha superado las 3 oportunidades! Por seguridad, el sistema está bloqueado por ${secondsLeft} segundos.`;
+            } else {
+              clearInterval(clientLockTimer);
+              clientAttemptsLeft = 3;
+              document.getElementById('client-login-attempts-cnt').textContent = '3';
+              idInput.disabled = false;
+              passInput.disabled = false;
+              submitBtn.disabled = false;
+              submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+              passInput.value = '';
+              loginErrorMsg.textContent = 'Bloqueo finalizado. Dispone de 3 nuevas oportunidades para intentar ingresar.';
+              loginErrorBox.classList.remove('hidden');
+            }
+          }, 1000);
+        }
       }
     });
 
-    // Form Admin Password Portal Login Action
+    // Form Admin Password Portal Login Action (3 Attempts Security Guard)
     const adminLoginForm = document.getElementById('admin-portal-login-form');
     const adminErrorBox = document.getElementById('admin-error-box');
     const adminErrorMsg = document.getElementById('admin-error-msg');
+    let adminPortalAttemptsLeft = 3;
+    let adminPortalTimer = null;
 
     adminLoginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       adminErrorBox.classList.add('hidden');
 
-      const passVal = document.getElementById('admin-password').value;
+      const passInput = document.getElementById('admin-password');
+      const submitBtn = document.getElementById('btn-submit-admin-portal');
+      const passVal = passInput.value;
+
       if (passVal === 'admin123') {
         localStorage.setItem('alpes_admin_session', 'true');
         alert('¡Acceso concedido a la Consola Administrativa!');
         window.location.href = 'admin.html';
       } else {
-        adminErrorMsg.textContent = 'Contraseña incorrecta. Intente con el código de simulación del taller: admin123';
-        adminErrorBox.classList.remove('hidden');
+        adminPortalAttemptsLeft--;
+        document.getElementById('admin-portal-attempts-cnt').textContent = adminPortalAttemptsLeft;
+
+        if (adminPortalAttemptsLeft > 0) {
+          adminErrorMsg.textContent = `Contraseña incorrecta. Le quedan ${adminPortalAttemptsLeft} de 3 oportunidades. Simulación SENA: admin123`;
+          adminErrorBox.classList.remove('hidden');
+        } else {
+          passInput.disabled = true;
+          submitBtn.disabled = true;
+          submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+          let secondsLeft = 30;
+          adminErrorMsg.textContent = `¡Ha superado las 3 oportunidades! Acceso a consola bloqueado por ${secondsLeft} segundos.`;
+          adminErrorBox.classList.remove('hidden');
+
+          adminPortalTimer = setInterval(() => {
+            secondsLeft--;
+            if (secondsLeft > 0) {
+              adminErrorMsg.textContent = `¡Ha superado las 3 oportunidades! Acceso a consola bloqueado por ${secondsLeft} segundos.`;
+            } else {
+              clearInterval(adminPortalTimer);
+              adminPortalAttemptsLeft = 3;
+              document.getElementById('admin-portal-attempts-cnt').textContent = '3';
+              passInput.disabled = false;
+              submitBtn.disabled = false;
+              submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+              passInput.value = '';
+              adminErrorMsg.textContent = 'Bloqueo finalizado. Dispone de 3 nuevas oportunidades para intentar.';
+              adminErrorBox.classList.remove('hidden');
+            }
+          }, 1000);
+        }
       }
     });
 
@@ -1523,14 +1905,30 @@ function renderProfileScreen() {
       `;
       
       qBtn.addEventListener('click', () => {
-        state.currentCliente = client;
-        saveToLocalStorage();
-        alert(`¡Bienvenido de vuelta, ${client.nombreCompleto}!`);
-        // if cart has elements go back to cart, else storefront
-        if (state.carrito.length > 0) {
-          navigatetoView('cart');
-        } else {
-          navigatetoView('store');
+        let attempts = 3;
+        let passInput = prompt(`Autenticación requerida para ${client.nombreCompleto}.\nIngrese su contraseña (Simulación SENA: alpes123):\nOportunidades restantes: ${attempts} de 3`);
+        
+        while (passInput !== null) {
+          const expected = client.password || 'alpes123';
+          if (passInput === expected) {
+            state.currentCliente = client;
+            saveToLocalStorage();
+            alert(`¡Autenticación exitosa! Bienvenido/a ${client.nombreCompleto}.`);
+            if (state.carrito.length > 0) {
+              navigatetoView('cart');
+            } else {
+              navigatetoView('store');
+            }
+            break;
+          } else {
+            attempts--;
+            if (attempts > 0) {
+              passInput = prompt(`Contraseña incorrecta. Le quedan ${attempts} de 3 oportunidades.\nIngrese su contraseña para ${client.nombreCompleto} (Simulación: alpes123):`);
+            } else {
+              alert('¡Ha agotado las 3 oportunidades de ingreso rápido para esta cuenta!');
+              break;
+            }
+          }
         }
       });
 
@@ -1552,7 +1950,7 @@ function renderProfileScreen() {
       }
     });
 
-    // Handle submit registration
+    // Handle submit registration with password creation
     const regForm = document.getElementById('profile-registration-form');
     const errorBox = document.getElementById('reg-error-box');
     const regErrorMsg = document.getElementById('reg-error-msg');
@@ -1564,6 +1962,8 @@ function renderProfileScreen() {
       const tipoDocumento = regTipoDoc.value;
       const numeroDocumento = numDocInput.value.trim();
       const nombreCompleto = document.getElementById('reg-nombre').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirmPassword = document.getElementById('reg-confirm-password').value;
       const email = document.getElementById('reg-email').value.trim();
       const direccion = document.getElementById('reg-direccion').value.trim();
       const ciudadResidencia = document.getElementById('reg-ciudad').value.trim();
@@ -1573,6 +1973,18 @@ function renderProfileScreen() {
       const profesion = document.getElementById('reg-profesion').value.trim();
       const perteneceEmpresa = document.getElementById('reg-empresa').checked;
       const isJuridica = (tipoDocumento === 'NIT');
+
+      if (password !== confirmPassword) {
+        regErrorMsg.textContent = 'Las contraseñas no coinciden. Por favor verifique ambas claves ingresadas.';
+        errorBox.classList.remove('hidden');
+        return;
+      }
+
+      if (password.length < 4) {
+        regErrorMsg.textContent = 'La contraseña debe tener una longitud mínima de 4 caracteres.';
+        errorBox.classList.remove('hidden');
+        return;
+      }
 
       // Check for document duplicates
       const duplicate = state.clientes.find(c => c.numeroDocumento === numeroDocumento);
@@ -1587,6 +1999,7 @@ function renderProfileScreen() {
         tipoDocumento,
         numeroDocumento,
         nombreCompleto,
+        password,
         email,
         direccion,
         ciudadResidencia,
@@ -1603,7 +2016,7 @@ function renderProfileScreen() {
       state.currentCliente = freshNewClient;
       saveToLocalStorage();
       
-      alert(`¡Registro Exitoso! Bienvenido señor/a ${nombreCompleto}. Ha ingresado a su portal de servicios del SENA.`);
+      alert(`¡Registro y Apertura de Sesión Exitosos! Bienvenido/a ${nombreCompleto}. Ha iniciado sesión con la contraseña creada.`);
       
       if (state.carrito.length > 0) {
         navigatetoView('cart');
@@ -1692,7 +2105,7 @@ function renderCheckoutScreen() {
           <!-- PSE SECTION DIV -->
           <div id="payment-pse-block" class="space-y-3 hidden">
              <h4 class="text-[10px] uppercase tracking-widest font-extrabold text-stone-400 mb-2">Pasarela PSE y Transferencia Electrónica</h4>
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-stone-750">
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-stone-700">
                <div>
                  <label class="text-[10px] font-bold text-stone-400 block mb-1">Entidad Bancaria (*)</label>
                  <select id="pay-pse-bank" class="w-full px-3 py-2 bg-stone-50 border rounded-xl text-xs text-stone-800 font-semibold focus:outline-none focus:border-amber-705">
@@ -1714,7 +2127,7 @@ function renderCheckoutScreen() {
           <!-- CURRENT ACCOUNT DIV -->
           <div id="payment-current-block" class="space-y-3 hidden">
              <h4 class="text-[10px] uppercase tracking-widest font-extrabold text-stone-400 mb-2">Pago Corporativo de Cuenta Corriente</h4>
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-stone-750">
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-stone-700">
                <div>
                  <label class="text-[10px] font-bold text-stone-400 block mb-1">Número de Cuenta Corriente (*)</label>
                  <input type="text" id="pay-curr-num" class="w-full px-3 py-2 bg-stone-50 border rounded-xl text-xs font-mono font-bold" placeholder="Ej. 120-43567-43">
@@ -1767,7 +2180,7 @@ function renderCheckoutScreen() {
                <span>Envío:</span> 
                <span class="text-[9px] uppercase font-black bg-yellow-400/25 px-1.5 rounded py-0.5">Gratis</span>
              </div>
-             <div class="border-t border-amber-850 pt-2 flex justify-between text-sm font-display font-black text-white">
+             <div class="border-t border-amber-800 pt-2 flex justify-between text-sm font-display font-black text-white">
                <span>Total Neto:</span>
                <span>${formatCOP(subtotal)}</span>
              </div>
@@ -1990,16 +2403,16 @@ function renderSuccessInvoice() {
       <!-- Grand sum total -->
       <div class="flex justify-between items-baseline pt-1">
          <span class="text-xs font-serif font-extrabold text-stone-900 uppercase">Valor Neto Cancelado Directo (COP):</span>
-         <span class="text-lg font-display text-amber-905 font-black text-amber-900 font-mono">${formatCOP(ord.valorTotal)}</span>
+         <span class="text-lg font-display font-black text-amber-900 font-mono">${formatCOP(ord.valorTotal)}</span>
       </div>
     </div>
 
     <!-- Print back and reset buttons -->
     <div class="flex justify-center gap-3 mt-8">
-      <button id="success-go-home-btn" class="bg-stone-850 hover:bg-stone-950 text-white rounded-xl px-6 py-3 text-xs font-black transition shadow-sm uppercase tracking-wider cursor-pointer">
+      <button id="success-go-home-btn" class="bg-stone-900 hover:bg-stone-950 text-white rounded-xl px-6 py-3 text-xs font-black transition shadow-sm uppercase tracking-wider cursor-pointer">
         Volver a la Tienda Principal
       </button>
-      <button id="success-print-btn" onclick="window.print()" class="border border-stone-350 hover:bg-stone-100 text-stone-700 rounded-xl px-5 py-3 text-xs font-black transition flex items-center gap-1 cursor-pointer">
+      <button id="success-print-btn" onclick="window.print()" class="border border-stone-300 hover:bg-stone-100 text-stone-700 rounded-xl px-5 py-3 text-xs font-black transition flex items-center gap-1 cursor-pointer">
         <i data-lucide="printer" class="w-4 h-4"></i>
         Imprimir Remisión
       </button>
@@ -2088,4 +2501,3 @@ function renderPurchasesHistory() {
 
   lucide.createIcons();
 }
-
