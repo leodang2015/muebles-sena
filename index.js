@@ -1205,6 +1205,12 @@ function renderDetailedProduct() {
 // ========================================== SHOPPING CART WORKFLOW (SUBVIEW 3) ==========================================
 
 function addItemToShoppingBag(reference, requestedQuantity) {
+  if (!state.currentCliente) {
+    alert('⚠️ Advertencia: Debe iniciar sesión para agregar productos al carrito de compras.');
+    navigatetoView('profile');
+    return;
+  }
+
   const m = mueblesFindRef(reference);
   if (!m) return;
 
@@ -2501,4 +2507,3 @@ function renderPurchasesHistory() {
 
   lucide.createIcons();
 }
-
